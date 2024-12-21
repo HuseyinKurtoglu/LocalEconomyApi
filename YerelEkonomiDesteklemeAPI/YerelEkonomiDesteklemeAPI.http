@@ -1,0 +1,6 @@
+@YerelEkonomiDesteklemeAPI_HostAddress = http://localhost:5079
+
+GET {{YerelEkonomiDesteklemeAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
