@@ -1,4 +1,5 @@
 ﻿using LocalEconomyApi.Models;
+using LocalEconomyApi.Models.Concrete;
 
 namespace LocalEconomyApi.Models
 {

@@ -1,5 +1,6 @@
 ﻿
 using LocalEconomyApi.Models;
+using LocalEconomyApi.Models.Concrete;
 
 namespace LocalEconomyApi.DataAccess.Abstract
 {

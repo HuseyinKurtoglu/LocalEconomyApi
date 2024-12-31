@@ -3,6 +3,7 @@ using LocalEconomyApi.DataAccess.Abstract;
 using System.Collections.Generic;
 using System.Linq;
 using LocalEconomyApi.Models;
+using LocalEconomyApi.Models.Concrete;
 
 namespace LocalEconomyApi.DataAccess.Concrete
 {

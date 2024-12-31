@@ -20,4 +20,10 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\YerelBusiness\LocalEconomyApi.Business.csproj" />
+    <ProjectReference Include="..\YerelEkonomiDestekleme.DataAcces\LocalEconomyApi.DataAcces.csproj" />
+    <ProjectReference Include="..\YerelEkonomiDestekleme.Entities\LocalEconomyApi.Entities.csproj" />
+  </ItemGroup>
+
 </Project>

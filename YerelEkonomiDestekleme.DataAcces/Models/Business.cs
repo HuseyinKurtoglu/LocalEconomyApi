@@ -1,6 +1,6 @@
 ﻿using LocalEconomyApi.Models;
 
-namespace LocalEconomyApi.Models
+namespace LocalEconomyApi.Models.Concrete
 {
     public class Business
     {
@@ -11,7 +11,6 @@ namespace LocalEconomyApi.Models
         public string PhoneNumber { get; set; }
         public int? CategoryId { get; set; }
         public Category Category { get; set; }
-
         public ICollection<Campaign> Campaigns { get; set; }
     }
 }

@@ -16,7 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\YerelEkonomiDesteklemeAPI\LocalEconomyAPI.csproj" />
+    <ProjectReference Include="..\YerelEkonomiDestekleme.DataAcces\LocalEconomyApi.DataAcces.csproj" />
+    <ProjectReference Include="..\YerelEkonomiDestekleme.Entities\LocalEconomyApi.Entities.csproj" />
   </ItemGroup>
 
 </Project>

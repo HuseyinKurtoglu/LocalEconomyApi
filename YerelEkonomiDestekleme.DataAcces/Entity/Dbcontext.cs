@@ -1,6 +1,7 @@
 ﻿using LocalEconomyApi.Models;
 using Microsoft.EntityFrameworkCore;
 using LocalEconomyApi.Models;
+using LocalEconomyApi.Models.Concrete;
 
 namespace LocalEconomyApi.Data
 {
