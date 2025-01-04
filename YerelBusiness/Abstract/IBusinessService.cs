@@ -12,5 +12,6 @@ namespace LocalEconomyApi.Abstract.business
         void UpdateBusiness(Business business);
         void DeleteBusiness(int id);
         IEnumerable<Business> GetBusinessesByCity(string city);
+        void SoftDeleteBusiness(int id);
     }
 }

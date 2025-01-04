@@ -1,6 +1,7 @@
 ﻿using LocalEconomyApi.Abstract.business;
 using LocalEconomyApi.Models.Concrete;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 
@@ -11,10 +12,12 @@ namespace LocalEconomyApi.Controllers.business
     public class BusinessController : ControllerBase
     {
         private readonly IBusinessService _businessService;
+        private readonly DbContext _context;
 
-        public BusinessController(IBusinessService businessService)
+        public BusinessController(IBusinessService businessService, DbContext context)
         {
             _businessService = businessService;
+            _context = context;
         }
 
         // GET: api/Business
@@ -123,5 +126,24 @@ namespace LocalEconomyApi.Controllers.business
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpPut("SoftDelete/{id}")]
+        public IActionResult SoftDelete(int id)
+        {
+            try
+            {
+                _businessService.SoftDeleteBusiness(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
     }
 }

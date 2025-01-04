@@ -89,6 +89,27 @@ namespace LocalEconomyApi.Concrete.business
             }
         }
 
+        public void SoftDeleteBusiness(int id)
+        {
+            try
+            {
+                var business = _businessRepository.Get(b => b.BusinessId == id);
+                if (business == null)
+                    throw new KeyNotFoundException($"ID: {id} olan işletme bulunamadı.");
+
+                // İşletmeyi soft delete yapmak için IsDeleted alanını true olarak ayarlayın.
+                business.IsDeleted = true;
+                business.UpdatedDate = DateTime.Now;
+                business.UpdatedBy = "CurrentUser"; // Giriş yapan kullanıcı bilgisi buraya alınabilir.
+
+                _businessRepository.Update(business);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"ID: {id} olan işletme soft delete yapılırken bir hata oluştu.", ex);
+            }
+        }
+
         public IEnumerable<Business> GetBusinessesByCity(string city)
         {
             try

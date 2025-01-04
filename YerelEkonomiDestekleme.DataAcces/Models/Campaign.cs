@@ -15,5 +15,9 @@ namespace LocalEconomyApi.Models
         public Category Category { get; set; }
         public int BusinessId { get; set; }
         public Business Business { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+        public string UpdatedBy { get; set; }
+
     }
 }
