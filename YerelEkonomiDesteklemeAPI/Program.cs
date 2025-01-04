@@ -27,6 +27,10 @@ internal class Program
         builder.Services.AddScoped<IBusinessRepository, BusinessRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+        builder.Services.AddScoped<ICategoryService, CategoryService>();
+        builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
+        builder.Services.AddScoped<ICampaignService, CampaignService>();
 
 
 
