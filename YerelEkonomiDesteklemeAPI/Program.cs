@@ -31,6 +31,11 @@ internal class Program
         builder.Services.AddScoped<ICategoryService, CategoryService>();
         builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
         builder.Services.AddScoped<ICampaignService, CampaignService>();
+        builder.Services.AddScoped<ILogRepository, LogRepository>();
+        builder.Services.AddScoped<ILogService, LogService>();
+        builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+        builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+
 
 
 
