@@ -1,12 +1,11 @@
-﻿using LocalEconomyApi.Abstract.business;
-using LocalEconomyApi.Abstract;
-using LocalEconomyApi.DataAccess.Abstract;
-using LocalEconomyApi.Models;
-using LocalEconomyApi.Models.Concrete;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Models;
+using YerelEkonomiDestekleme.DataAcces.Abstract;
+using YerelBusiness.Abstract;
 
-namespace LocalEconomyApi.Concrete.business
+namespace YerelBusiness.Concrete
 {
     public class BusinessService : IBusinessService
     {
@@ -17,109 +16,46 @@ namespace LocalEconomyApi.Concrete.business
             _businessRepository = businessRepository;
         }
 
-        public IEnumerable<Business> GetAllBusinesses()
+        public async Task<List<Business>> GetAllBusinessesAsync()
         {
-            try
-            {
-                return _businessRepository.GetAll();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("İşletmeler alınırken bir hata oluştu.", ex);
-            }
+            var businesses = await _businessRepository.GetAllAsync();
+            return businesses.ToList();
         }
 
-        public Business GetBusinessById(int id)
+        public async Task<Business> GetBusinessByIdAsync(int id)
         {
-            try
-            {
-                var business = _businessRepository.Get(b => b.BusinessId == id);
-                if (business == null)
-                    throw new KeyNotFoundException($"ID: {id} olan işletme bulunamadı.");
-
-                return business;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"ID: {id} için işletme alınırken bir hata oluştu.", ex);
-            }
+            return await _businessRepository.GetByIdAsync(id);
         }
 
-        public void AddBusiness(Business business)
+        public async Task<Business> AddBusinessAsync(Business business)
         {
-            try
-            {
-                _businessRepository.Add(business);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("İşletme eklenirken bir hata oluştu.", ex);
-            }
+            return await _businessRepository.AddAsync(business);
         }
 
-        public void UpdateBusiness(Business business)
+        public async Task<Business> UpdateBusinessAsync(Business business)
         {
-            try
-            {
-                var existingBusiness = _businessRepository.Get(b => b.BusinessId == business.BusinessId);
-                if (existingBusiness == null)
-                    throw new KeyNotFoundException($"ID: {business.BusinessId} olan işletme bulunamadı.");
-
-                _businessRepository.Update(business);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"ID: {business.BusinessId} olan işletme güncellenirken bir hata oluştu.", ex);
-            }
+            return await _businessRepository.UpdateAsync(business);
         }
 
-        public void DeleteBusiness(int id)
+        public async Task<List<Business>> GetBusinessesByCategoryAsync(int categoryId)
         {
-            try
-            {
-                var business = _businessRepository.Get(b => b.BusinessId == id);
-                if (business == null)
-                    throw new KeyNotFoundException($"ID: {id} olan işletme bulunamadı.");
-
-                _businessRepository.Delete(business);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"ID: {id} olan işletme silinirken bir hata oluştu.", ex);
-            }
+            return await _businessRepository.GetByCategoryAsync(categoryId);
         }
 
-        public void SoftDeleteBusiness(int id)
+        public async Task<List<Business>> GetBusinessesByUserAsync(string userId)
         {
-            try
-            {
-                var business = _businessRepository.Get(b => b.BusinessId == id);
-                if (business == null)
-                    throw new KeyNotFoundException($"ID: {id} olan işletme bulunamadı.");
-
-                // İşletmeyi soft delete yapmak için IsDeleted alanını true olarak ayarlayın.
-                business.IsDeleted = true;
-                business.UpdatedDate = DateTime.Now;
-                business.UpdatedBy = "CurrentUser"; // Giriş yapan kullanıcı bilgisi buraya alınabilir.
-
-                _businessRepository.Update(business);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"ID: {id} olan işletme soft delete yapılırken bir hata oluştu.", ex);
-            }
+            return await _businessRepository.GetByUserAsync(userId);
         }
 
-        public IEnumerable<Business> GetBusinessesByCity(string city)
+        public async Task DeleteBusinessAsync(Business business)
         {
-            try
-            {
-                return _businessRepository.GetBusinessesByCity(city);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Şehir: {city} için işletmeler alınırken bir hata oluştu.", ex);
-            }
+            await _businessRepository.DeleteAsync(business);
+        }
+
+        public List<Business> GetBusinessesByCity(string city)
+        {
+            return _businessRepository.GetByCity(city).ToList();
         }
     }
 }
+

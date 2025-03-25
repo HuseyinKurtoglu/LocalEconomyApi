@@ -1,46 +1,123 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
+using System.Reflection;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using YerelEkonomiDestekleme.DataAcces.Abstract;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.DataAccess
+namespace YerelEkonomiDestekleme.DataAcces.Concrete
 {
-    public class GenericRepository<T> where T : class
+    public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        protected readonly DbContext _context;
+        protected readonly AppDbContext _context;
+        protected readonly DbSet<T> _dbSet;
 
-        public GenericRepository(DbContext context)
+        public GenericRepository(AppDbContext context)
         {
             _context = context;
+            _dbSet = context.Set<T>();
         }
 
-        public IEnumerable<T> GetAll()
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
-            return _context.Set<T>().ToList();
+            var query = _dbSet.AsQueryable();
+
+            if (typeof(T) == typeof(BusinessEntity))
+            {
+                query = query.Include("Campaigns").Include("Category");
+            }
+            else if (typeof(T) == typeof(Campaign))
+            {
+                query = query.Include("Business").Include("Category");
+            }
+            else if (typeof(T) == typeof(Category))
+            {
+                query = query.Include("Businesses").Include("Campaigns");
+            }
+
+            return await query.ToListAsync();
         }
 
-        public T Get(Expression<Func<T, bool>> predicate)
+        public virtual async Task<T> GetByIdAsync(int id)
         {
-            return _context.Set<T>().FirstOrDefault(predicate);
+            var entity = await _dbSet.FindAsync(id);
+
+            if (entity == null)
+                throw new InvalidOperationException($"ID {id} olan {typeof(T).Name} bulunamadı.");
+
+            // Soft delete kontrolü
+            var isDeletedProperty = entity.GetType().GetProperty("IsDeleted");
+            if (isDeletedProperty != null)
+            {
+                bool? isDeleted = (bool?)isDeletedProperty.GetValue(entity);
+                if (isDeleted == true)
+                    throw new InvalidOperationException($"ID {id} olan {typeof(T).Name} silinmiş.");
+            }
+
+            return entity;
         }
 
-        public void Add(T entity)
+        public async Task<T> AddAsync(T entity)
         {
-            _context.Set<T>().Add(entity);
-            _context.SaveChanges();
+            // Eğer eklenen nesne bir BusinessEntity ise isim benzersiz mi kontrol et
+            if (typeof(T) == typeof(BusinessEntity))
+            {
+                var business = entity as BusinessEntity;
+
+                // Aynı isimde aktif işletme var mı?
+                var existingBusiness = await _dbSet
+                    .Where(e => EF.Property<string>(e, "Name") == business.Name)
+                    .FirstOrDefaultAsync();
+
+                if (existingBusiness != null)
+                {
+                    var isDeletedProperty = existingBusiness.GetType().GetProperty("IsDeleted");
+                    if (isDeletedProperty != null)
+                    {
+                        bool? isDeleted = (bool?)isDeletedProperty.GetValue(existingBusiness);
+                        if (isDeleted == true)
+                        {
+                            // Eğer işletme soft delete olarak işaretlenmişse, tekrar aktif hale getir
+                            isDeletedProperty.SetValue(existingBusiness, false);
+                            _dbSet.Update(existingBusiness);
+                            await _context.SaveChangesAsync();
+                            return existingBusiness as T;
+                        }
+                    }
+
+                    throw new InvalidOperationException($"'{business.Name}' adında aktif bir işletme zaten mevcut.");
+                }
+            }
+
+            await _dbSet.AddAsync(entity);
+            await _context.SaveChangesAsync();
+            return entity;
         }
 
-        public void Update(T entity)
+        public async Task<T> UpdateAsync(T entity)
         {
-            _context.Set<T>().Update(entity);
-            _context.SaveChanges();
+            _dbSet.Update(entity);
+            await _context.SaveChangesAsync();
+            return entity;
         }
 
-        public void Delete(T entity)
+        public virtual async Task DeleteAsync(T entity)
         {
-            _context.Set<T>().Remove(entity);
-            _context.SaveChanges();
+            var isDeletedProperty = entity.GetType().GetProperty("IsDeleted");
+
+            if (isDeletedProperty != null)
+            {
+                isDeletedProperty.SetValue(entity, true);
+                _dbSet.Update(entity);
+            }
+            else
+            {
+                _dbSet.Remove(entity);
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

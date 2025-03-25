@@ -1,10 +1,12 @@
-﻿using LocalEconomyApi.Abstract;
-using LocalEconomyApi.DataAccess.Abstract;
-using LocalEconomyApi.Models;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Entity;
+using YerelEkonomiDestekleme.DataAcces.Abstract;
+using YerelBusiness.Abstract;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.Concrete
+namespace YerelBusiness.Concrete
 {
     public class CategoryService : ICategoryService
     {
@@ -15,51 +17,45 @@ namespace LocalEconomyApi.Concrete
             _categoryRepository = categoryRepository;
         }
 
-        public IEnumerable<Category> GetAllCategories()
+        public async Task<List<Category>> GetAllCategoriesAsync()
         {
-            return _categoryRepository.GetAll();
+            var categories = await _categoryRepository.GetAllAsync();
+            return categories.ToList();
         }
 
-        public Category GetCategoryById(int id)
+        public async Task<Category> GetCategoryByIdAsync(int id)
         {
-            var category = _categoryRepository.Get(c => c.CategoryId == id);
-            if (category == null)
-                throw new KeyNotFoundException($"ID: {id} olan kategori bulunamadı.");
-
-            return category;
+            return await _categoryRepository.GetByIdAsync(id);
         }
 
-        public void AddCategory(Category category)
+        public async Task<Category> AddCategoryAsync(Category category)
         {
-            _categoryRepository.Add(category);
+            return await _categoryRepository.AddAsync(category);
         }
 
-        public void UpdateCategory(Category category)
+        public async Task<Category> UpdateCategoryAsync(Category category)
         {
-            var existingCategory = _categoryRepository.Get(c => c.CategoryId == category.CategoryId);
-            if (existingCategory == null)
-                throw new KeyNotFoundException($"ID: {category.CategoryId} olan kategori bulunamadı.");
-
-            _categoryRepository.Update(category);
+            return await _categoryRepository.UpdateAsync(category);
         }
 
-        public void DeleteCategory(int id)
+        public async Task DeleteCategoryAsync(Category category)
         {
-            var category = _categoryRepository.Get(c => c.CategoryId == id);
-            if (category == null)
-                throw new KeyNotFoundException($"ID: {id} olan kategori bulunamadı.");
-
-            _categoryRepository.Delete(category);
+            await _categoryRepository.DeleteAsync(category);
         }
 
-        public IEnumerable<Category> GetActiveCategories()
+        public async Task<Category> GetCategoryByNameAsync(string name)
         {
-            return _categoryRepository.GetActiveCategories();
+            return await _categoryRepository.GetCategoryByNameAsync(name);
         }
 
-        public Category FindCategoryByName(string name)
+        public async Task<List<Category>> GetActiveCategoriesAsync()
         {
-            return _categoryRepository.FindCategoryByName(name);
+            return await _categoryRepository.GetActiveCategoriesAsync();
+        }
+
+        public async Task<Category> FindCategoryByNameAsync(string name)
+        {
+            return await _categoryRepository.FindCategoryByNameAsync(name);
         }
     }
 }

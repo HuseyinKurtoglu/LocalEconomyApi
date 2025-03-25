@@ -1,8 +1,12 @@
-﻿using LocalEconomyApi.Abstract;
-using LocalEconomyApi.DataAccess.Abstract;
-using LocalEconomyApi.Models;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Linq;
+using YerelEkonomiDestekleme.DataAcces.Entity;
+using YerelEkonomiDestekleme.DataAcces.Abstract;
+using YerelEkonomiDestekleme.Business.Abstract;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.Concrete
+namespace YerelEkonomiDestekleme.Business.Concrete
 {
     public class UserService : IUserService
     {
@@ -13,32 +17,43 @@ namespace LocalEconomyApi.Concrete
             _userRepository = userRepository;
         }
 
-        public IEnumerable<User> GetAllUsers()
+        public async Task<List<User>> GetAllUsers()
         {
-            return _userRepository.GetAll();
+            var users = await _userRepository.GetAllAsync();
+            return users.ToList();
         }
 
-        public User GetUserById(int id)
+        public async Task<User> GetUserById(string id)
         {
-            return _userRepository.GetById(id);
+            return await _userRepository.GetByIdAsync(id);
         }
 
-        public void AddUser(User user)
+        public async Task<User> GetUserByEmail(string email)
         {
-            _userRepository.Add(user);
+            return await _userRepository.GetByEmailAsync(email);
         }
 
-        public void UpdateUser(User user)
+        public async Task<List<User>> GetUsersByRole(string role)
         {
-            _userRepository.Update(user);
+            return await _userRepository.GetByRoleAsync(role);
         }
 
-        public void DeleteUser(int id)
+        public async Task<User> AddUser(User user)
         {
-            var user = _userRepository.GetById(id);
+            return await _userRepository.AddAsync(user);
+        }
+
+        public async Task<User> UpdateUser(User user)
+        {
+            return await _userRepository.UpdateAsync(user);
+        }
+
+        public async Task DeleteUser(string id)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
             if (user != null)
             {
-                _userRepository.Delete(user);
+                await _userRepository.DeleteAsync(user);
             }
         }
     }

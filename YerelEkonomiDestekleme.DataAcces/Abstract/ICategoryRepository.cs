@@ -1,14 +1,16 @@
-﻿using LocalEconomyApi.Models;
-using LocalEconomyApi.Models.Concrete;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.DataAccess.Abstract
+namespace YerelEkonomiDestekleme.DataAcces.Abstract
 {
     public interface ICategoryRepository : IGenericRepository<Category>
     {
-        IEnumerable<Business> GetBusinessesByCategoryId(int categoryId);
-        IEnumerable<Campaign> GetCampaignsByCategoryId(int categoryId);
-        IEnumerable<Category> GetActiveCategories();
-        Category FindCategoryByName(string name);
+        Task<List<Category>> GetAllWithBusinessesAsync();
+        Task<Category?> GetByIdWithBusinessesAsync(int id);
+        Task<List<BusinessEntity>> GetBusinessesByCategoryAsync(int categoryId);
+        Task<Category?> GetCategoryByNameAsync(string name);
+        Task<List<Category>> GetActiveCategoriesAsync();
+        Task<Category?> FindCategoryByNameAsync(string name);
     }
 }

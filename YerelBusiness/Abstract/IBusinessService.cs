@@ -1,17 +1,18 @@
-﻿using LocalEconomyApi.Models;
-using System.Collections.Generic;
-using LocalEconomyApi.Models.Concrete;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.Abstract.business
+namespace YerelBusiness.Abstract
 {
     public interface IBusinessService
     {
-        IEnumerable<Business> GetAllBusinesses();
-        Business GetBusinessById(int id);
-        void AddBusiness(Business business);
-        void UpdateBusiness(Business business);
-        void DeleteBusiness(int id);
-        IEnumerable<Business> GetBusinessesByCity(string city);
-        void SoftDeleteBusiness(int id);
+        Task<List<Business>> GetAllBusinessesAsync();
+        Task<Business> GetBusinessByIdAsync(int id);
+        Task<Business> AddBusinessAsync(Business business);
+        Task<Business> UpdateBusinessAsync(Business business);
+        Task<List<Business>> GetBusinessesByCategoryAsync(int categoryId);
+        Task<List<Business>> GetBusinessesByUserAsync(string userId);
+        Task DeleteBusinessAsync(Business business);
+        List<Business> GetBusinessesByCity(string city);
     }
 }

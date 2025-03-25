@@ -1,9 +1,12 @@
-﻿using LocalEconomyApi.Abstract;
-using LocalEconomyApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Abstract;
+using YerelEkonomiDestekleme.DataAcces.Models;
+using YerelEkonomiDestekleme.Business.Abstract;
+using System.Linq;
 
-namespace LocalEconomyApi.Controllers
+namespace YerelEkonomiDesteklemeAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -17,54 +20,108 @@ namespace LocalEconomyApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllCategories()
+        public async Task<ActionResult<List<Category>>> GetAllCategories()
         {
-            return Ok(_categoryService.GetAllCategories());
+            var categories = await _categoryService.GetAllCategories();
+            var optimizedCategories = categories.Select(c => new
+            {
+                c.CategoryId,
+                c.Name,
+                c.Description,
+                Businesses = c.Businesses?.Select(b => new
+                {
+                    b.BusinessId,
+                    b.Name,
+                    b.Description,
+                    b.City
+                }).ToList(),
+                Campaigns = c.Campaigns?.Select(c => new
+                {
+                    c.CampaignId,
+                    c.Title,
+                    c.Description,
+                    c.DiscountRate,
+                    c.StartDate,
+                    c.EndDate,
+                    c.BusinessId
+                }).ToList(),
+                c.IsDeleted,
+                c.CreatedDate
+            }).ToList();
+            return Ok(optimizedCategories);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetCategoryById(int id)
+        public async Task<ActionResult<Category>> GetCategoryById(int id)
         {
-            try
+            var category = await _categoryService.GetCategoryById(id);
+            if (category == null)
             {
-                var category = _categoryService.GetCategoryById(id);
-                return Ok(category);
+                return NotFound();
             }
-            catch (KeyNotFoundException ex)
+            var optimizedCategory = new
             {
-                return NotFound(new { message = ex.Message });
-            }
+                category.CategoryId,
+                category.Name,
+                category.Description,
+                Businesses = category.Businesses?.Select(b => new
+                {
+                    b.BusinessId,
+                    b.Name,
+                    b.Description,
+                    b.City
+                }).ToList(),
+                Campaigns = category.Campaigns?.Select(c => new
+                {
+                    c.CampaignId,
+                    c.Title,
+                    c.Description,
+                    c.DiscountRate,
+                    c.StartDate,
+                    c.EndDate,
+                    c.BusinessId
+                }).ToList(),
+                category.IsDeleted,
+                category.CreatedDate
+            };
+            return Ok(optimizedCategory);
         }
 
         [HttpPost]
-        public IActionResult AddCategory([FromBody] Category category)
+        public async Task<ActionResult<Category>> CreateCategory(Category category)
         {
-            _categoryService.AddCategory(category);
-            return CreatedAtAction(nameof(GetCategoryById), new { id = category.CategoryId }, category);
+            var createdCategory = await _categoryService.AddCategory(category);
+            return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.CategoryId }, createdCategory);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateCategory(int id, [FromBody] Category category)
+        public async Task<IActionResult> UpdateCategory(int id, Category category)
         {
             if (id != category.CategoryId)
-                return BadRequest(new { message = "Kategori ID uyuşmazlığı." });
+            {
+                return BadRequest();
+            }
 
-            _categoryService.UpdateCategory(category);
+            var updatedCategory = await _categoryService.UpdateCategory(category);
+            if (updatedCategory == null)
+            {
+                return NotFound();
+            }
+
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteCategory(int id)
+        public async Task<IActionResult> DeleteCategory(int id)
         {
-            try
+            var category = await _categoryService.GetCategoryById(id);
+            if (category == null)
             {
-                _categoryService.DeleteCategory(id);
-                return NoContent();
+                return NotFound();
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+
+            await _categoryService.DeleteCategory(id);
+            return NoContent();
         }
     }
-}
+} 

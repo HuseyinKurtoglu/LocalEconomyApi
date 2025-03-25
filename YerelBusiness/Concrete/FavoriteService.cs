@@ -1,10 +1,12 @@
-﻿using LocalEconomyApi.Abstract;
-using LocalEconomyApi.DataAccess.Abstract;
-using LocalEconomyApi.Models;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Linq;
+using YerelEkonomiDestekleme.DataAcces.Entity;
+using YerelEkonomiDestekleme.DataAcces.Abstract;
+using YerelEkonomiDestekleme.Business.Abstract;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.Concrete
+namespace YerelEkonomiDestekleme.Business.Concrete
 {
     public class FavoriteService : IFavoriteService
     {
@@ -15,27 +17,34 @@ namespace LocalEconomyApi.Concrete
             _favoriteRepository = favoriteRepository;
         }
 
-        public IEnumerable<Favorite> GetFavoritesByUserId(int userId)
+        public async Task<List<Favorite>> GetAllFavorites()
         {
-            return _favoriteRepository.GetFavoritesByUserId(userId);
+            var favorites = await _favoriteRepository.GetAllAsync();
+            return favorites.ToList();
         }
 
-        public void AddFavorite(Favorite favorite)
+        public async Task<Favorite> GetFavoriteById(int id)
         {
-            favorite.UpdatedDate = DateTime.Now;
-            favorite.UpdatedBy = "System"; // Giriş yapan kullanıcı bilgisi burada setlenebilir
-            _favoriteRepository.Add(favorite);
+            return await _favoriteRepository.GetByIdAsync(id);
         }
 
-        public void RemoveFavorite(int favoriteId)
+        public async Task<List<Favorite>> GetFavoritesByUser(string userId)
         {
-            var favorite = _favoriteRepository.Get(f => f.FavoriteId == favoriteId);
-            if (favorite == null) throw new KeyNotFoundException("Favori bulunamadı.");
+            return await _favoriteRepository.GetByUserIdAsync(userId);
+        }
 
-            favorite.IsDeleted = true;
-            favorite.UpdatedDate = DateTime.Now;
-            favorite.UpdatedBy = "System"; // Giriş yapan kullanıcı bilgisi burada setlenebilir
-            _favoriteRepository.Update(favorite);
+        public async Task<Favorite> AddFavorite(Favorite favorite)
+        {
+            return await _favoriteRepository.AddAsync(favorite);
+        }
+
+        public async Task DeleteFavorite(int id)
+        {
+            var favorite = await _favoriteRepository.GetByIdAsync(id);
+            if (favorite != null)
+            {
+                await _favoriteRepository.DeleteAsync(favorite);
+            }
         }
     }
 }

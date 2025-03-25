@@ -1,149 +1,218 @@
-﻿using LocalEconomyApi.Abstract.business;
-using LocalEconomyApi.Models.Concrete;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Models;
+using YerelEkonomiDestekleme.Business.Abstract;
+using YerelEkonomiDestekleme.DataAcces.Concrete;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
-namespace LocalEconomyApi.Controllers.business
+namespace YerelEkonomiDesteklemeAPI.Controller
 {
     [ApiController]
     [Route("api/[controller]")]
     public class BusinessController : ControllerBase
     {
         private readonly IBusinessService _businessService;
-        private readonly DbContext _context;
+        private readonly AppDbContext _context;
 
-        public BusinessController(IBusinessService businessService, DbContext context)
+        public BusinessController(IBusinessService businessService, AppDbContext context)
         {
             _businessService = businessService;
             _context = context;
         }
 
-        // GET: api/Business
         [HttpGet]
-        public IActionResult GetAllBusinesses()
+        public async Task<ActionResult<IEnumerable<BusinessEntity>>> GetAll()
         {
-            try
+            var businesses = await _context.Businesses
+                .Include(b => b.Category)
+                .Include(b => b.Campaigns)
+                .Where(b => !b.IsDeleted)
+                .ToListAsync();
+
+            var result = businesses.Select(b => new
             {
-                var businesses = _businessService.GetAllBusinesses();
-                return Ok(businesses);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+                b.BusinessId,
+                b.Name,
+                b.Description,
+                b.Address,
+                b.City,
+                b.Phone,
+                b.Email,
+                b.ImageUrl,
+                b.CategoryId,
+                Category = b.Category != null ? new { b.Category.CategoryId, b.Category.Name } : null,
+                Campaigns = b.Campaigns?.Where(c => !c.IsDeleted).Select(c => new
+                {
+                    c.CampaignId,
+                    c.Title,
+                    c.Description,
+                    c.DiscountRate,
+                    c.StartDate,
+                    c.EndDate,
+                    c.CategoryId
+                })
+            });
+
+            return Ok(result);
         }
 
-        // GET: api/Business/{id}
         [HttpGet("{id}")]
-        public IActionResult GetBusinessById(int id)
+        public async Task<ActionResult<BusinessEntity>> GetById(int id)
         {
-            try
-            {
-                var business = _businessService.GetBusinessById(id);
-                if (business == null)
-                    return NotFound(new { message = $"Business with ID {id} not found." });
+            var business = await _context.Businesses
+                .Include(b => b.Category)
+                .Include(b => b.Campaigns)
+                .FirstOrDefaultAsync(b => b.BusinessId == id && !b.IsDeleted);
 
-                return Ok(business);
-            }
-            catch (Exception ex)
+            if (business == null)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return NotFound();
             }
+
+            var result = new
+            {
+                business.BusinessId,
+                business.Name,
+                business.Description,
+                business.Address,
+                business.City,
+                business.Phone,
+                business.Email,
+                business.ImageUrl,
+                business.CategoryId,
+                Category = business.Category != null ? new { business.Category.CategoryId, business.Category.Name } : null,
+                Campaigns = business.Campaigns?.Where(c => !c.IsDeleted).Select(c => new
+                {
+                    c.CampaignId,
+                    c.Title,
+                    c.Description,
+                    c.DiscountRate,
+                    c.StartDate,
+                    c.EndDate,
+                    c.CategoryId
+                })
+            };
+
+            return Ok(result);
         }
 
-        // POST: api/Business
+        [HttpGet("city/{city}")]
+        public async Task<ActionResult<IEnumerable<BusinessEntity>>> GetByCity(string city)
+        {
+            var businesses = await _context.Businesses
+                .Include(b => b.Category)
+                .Include(b => b.Campaigns)
+                .Where(b => b.City == city && !b.IsDeleted)
+                .ToListAsync();
+
+            var result = businesses.Select(b => new
+            {
+                b.BusinessId,
+                b.Name,
+                b.Description,
+                b.Address,
+                b.City,
+                b.Phone,
+                b.Email,
+                b.ImageUrl,
+                b.CategoryId,
+                Category = b.Category != null ? new { b.Category.CategoryId, b.Category.Name } : null,
+                Campaigns = b.Campaigns?.Where(c => !c.IsDeleted).Select(c => new
+                {
+                    c.CampaignId,
+                    c.Title,
+                    c.Description,
+                    c.DiscountRate,
+                    c.StartDate,
+                    c.EndDate,
+                    c.CategoryId
+                })
+            });
+
+            return Ok(result);
+        }
+
+        [HttpGet("category/{categoryId}")]
+        public async Task<ActionResult<IEnumerable<BusinessEntity>>> GetByCategory(int categoryId)
+        {
+            var businesses = await _context.Businesses
+                .Include(b => b.Category)
+                .Include(b => b.Campaigns)
+                .Where(b => b.CategoryId == categoryId && !b.IsDeleted)
+                .ToListAsync();
+
+            var result = businesses.Select(b => new
+            {
+                b.BusinessId,
+                b.Name,
+                b.Description,
+                b.Address,
+                b.City,
+                b.Phone,
+                b.Email,
+                b.ImageUrl,
+                b.CategoryId,
+                Category = b.Category != null ? new { b.Category.CategoryId, b.Category.Name } : null,
+                Campaigns = b.Campaigns?.Where(c => !c.IsDeleted).Select(c => new
+                {
+                    c.CampaignId,
+                    c.Title,
+                    c.Description,
+                    c.DiscountRate,
+                    c.StartDate,
+                    c.EndDate,
+                    c.CategoryId
+                })
+            });
+
+            return Ok(result);
+        }
+
         [HttpPost]
-        public IActionResult AddBusiness([FromBody] Business business)
+        public async Task<ActionResult<BusinessEntity>> Create([FromBody] BusinessEntity business)
         {
-            try
-            {
-                if (business == null)
-                    return BadRequest(new { message = "Invalid business data." });
-
-                _businessService.AddBusiness(business);
-                return CreatedAtAction(nameof(GetBusinessById), new { id = business.BusinessId }, business);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            var createdBusiness = await _businessService.AddBusiness(business);
+            return CreatedAtAction(nameof(GetById), new { id = createdBusiness.BusinessId }, createdBusiness);
         }
 
-        // PUT: api/Business/{id}
         [HttpPut("{id}")]
-        public IActionResult UpdateBusiness(int id, [FromBody] Business business)
+        public async Task<IActionResult> Update(int id, [FromBody] BusinessEntity business)
         {
-            try
+            if (id != business.BusinessId)
             {
-                if (business == null || business.BusinessId != id)
-                    return BadRequest(new { message = "Business ID mismatch or invalid data." });
-
-                _businessService.UpdateBusiness(business);
-                return NoContent();
+                return BadRequest();
             }
-            catch (KeyNotFoundException ex)
+            var updatedBusiness = await _businessService.UpdateBusiness(business);
+            if (updatedBusiness == null)
             {
-                return NotFound(new { message = ex.Message });
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
 
-        // DELETE: api/Business/{id}
         [HttpDelete("{id}")]
-        public IActionResult DeleteBusiness(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            try
+            var business = await _businessService.GetBusinessById(id);
+            if (business == null)
             {
-                _businessService.DeleteBusiness(id);
-                return NoContent();
+                return NotFound();
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            await _businessService.DeleteBusiness(id);
+            return NoContent();
         }
 
-        // GET: api/Business/City/{city}
-        [HttpGet("City/{city}")]
-        public IActionResult GetBusinessesByCity(string city)
+        [HttpPut("{id}/soft-delete")]
+        public async Task<IActionResult> SoftDelete(int id)
         {
-            try
+            var result = await _businessService.SoftDeleteBusiness(id);
+            if (!result)
             {
-                var businesses = _businessService.GetBusinessesByCity(city);
-                return Ok(businesses);
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
-
-        [HttpPut("SoftDelete/{id}")]
-        public IActionResult SoftDelete(int id)
-        {
-            try
-            {
-                _businessService.SoftDeleteBusiness(id);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
     }
 }

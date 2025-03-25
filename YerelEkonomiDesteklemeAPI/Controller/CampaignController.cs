@@ -1,9 +1,12 @@
-﻿using LocalEconomyApi.Abstract;
-using LocalEconomyApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Models;
+using YerelEkonomiDestekleme.Business.Abstract;
+using System.Linq;
 using System;
 
-namespace LocalEconomyApi.Controllers
+namespace YerelEkonomiDesteklemeAPI.Controller
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -17,120 +20,168 @@ namespace LocalEconomyApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<ActionResult<List<Campaign>>> GetAll()
         {
-            try
+            var campaigns = await _campaignService.GetAllCampaigns();
+            var optimizedCampaigns = campaigns.Select(c => new
             {
-                return Ok(_campaignService.GetAllCampaigns());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+                c.CampaignId,
+                c.Title,
+                c.Description,
+                c.DiscountRate,
+                c.StartDate,
+                c.EndDate,
+                c.BusinessId,
+                c.CategoryId,
+                Business = c.Business != null ? new
+                {
+                    c.Business.BusinessId,
+                    c.Business.Name,
+                    c.Business.Description,
+                    c.Business.City
+                } : null,
+                Category = c.Category != null ? new
+                {
+                    c.Category.CategoryId,
+                    c.Category.Name,
+                    c.Category.Description
+                } : null,
+                c.IsDeleted,
+                c.CreatedDate
+            }).ToList();
+            return Ok(optimizedCampaigns);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<ActionResult<Campaign>> GetById(int id)
         {
-            try
+            var campaign = await _campaignService.GetCampaignById(id);
+            if (campaign == null)
             {
-                var campaign = _campaignService.GetCampaignById(id);
-                if (campaign == null)
-                    return NotFound(new { message = $"Campaign with ID {id} not found." });
-
-                return Ok(campaign);
+                return NotFound();
             }
-            catch (Exception ex)
+            var optimizedCampaign = new
             {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpPost]
-        public IActionResult Add([FromBody] Campaign campaign)
-        {
-            try
-            {
-                if (campaign == null)
-                    return BadRequest(new { message = "Invalid campaign data." });
-
-                _campaignService.AddCampaign(campaign);
-                return CreatedAtAction(nameof(GetById), new { id = campaign.CampaignId }, campaign);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] Campaign campaign)
-        {
-            try
-            {
-                if (campaign == null || campaign.CampaignId != id)
-                    return BadRequest(new { message = "Campaign ID mismatch or invalid data." });
-
-                _campaignService.UpdateCampaign(campaign);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            try
-            {
-                _campaignService.DeleteCampaign(id);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("active")]
-        public IActionResult GetActiveCampaigns()
-        {
-            try
-            {
-                return Ok(_campaignService.GetActiveCampaigns());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+                campaign.CampaignId,
+                campaign.Title,
+                campaign.Description,
+                campaign.DiscountRate,
+                campaign.StartDate,
+                campaign.EndDate,
+                campaign.BusinessId,
+                campaign.CategoryId,
+                Business = campaign.Business != null ? new
+                {
+                    campaign.Business.BusinessId,
+                    campaign.Business.Name,
+                    campaign.Business.Description,
+                    campaign.Business.City
+                } : null,
+                Category = campaign.Category != null ? new
+                {
+                    campaign.Category.CategoryId,
+                    campaign.Category.Name,
+                    campaign.Category.Description
+                } : null,
+                campaign.IsDeleted,
+                campaign.CreatedDate
+            };
+            return Ok(optimizedCampaign);
         }
 
         [HttpGet("category/{categoryId}")]
-        public IActionResult GetByCategory(int categoryId)
+        public async Task<ActionResult<List<Campaign>>> GetByCategory(int categoryId)
         {
-            try
+            var campaigns = await _campaignService.GetCampaignsByCategory(categoryId);
+            var optimizedCampaigns = campaigns.Select(c => new
             {
-                return Ok(_campaignService.GetCampaignsByCategory(categoryId));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+                c.CampaignId,
+                c.Title,
+                c.Description,
+                c.DiscountRate,
+                c.StartDate,
+                c.EndDate,
+                c.BusinessId,
+                c.CategoryId,
+                Business = c.Business != null ? new
+                {
+                    c.Business.BusinessId,
+                    c.Business.Name,
+                    c.Business.Description,
+                    c.Business.City
+                } : null,
+                Category = c.Category != null ? new
+                {
+                    c.Category.CategoryId,
+                    c.Category.Name,
+                    c.Category.Description
+                } : null,
+                c.IsDeleted,
+                c.CreatedDate
+            }).ToList();
+            return Ok(optimizedCampaigns);
         }
 
         [HttpGet("business/{businessId}")]
-        public IActionResult GetByBusiness(int businessId)
+        public async Task<ActionResult<List<Campaign>>> GetByBusiness(int businessId)
         {
-            try
+            var campaigns = await _campaignService.GetCampaignsByBusiness(businessId);
+            var optimizedCampaigns = campaigns.Select(c => new
             {
-                return Ok(_campaignService.GetCampaignsByBusiness(businessId));
-            }
-            catch (Exception ex)
+                c.CampaignId,
+                c.Title,
+                c.Description,
+                c.DiscountRate,
+                c.StartDate,
+                c.EndDate,
+                c.BusinessId,
+                c.CategoryId,
+                Business = c.Business != null ? new
+                {
+                    c.Business.BusinessId,
+                    c.Business.Name,
+                    c.Business.Description,
+                    c.Business.City
+                } : null,
+                Category = c.Category != null ? new
+                {
+                    c.Category.CategoryId,
+                    c.Category.Name,
+                    c.Category.Description
+                } : null,
+                c.IsDeleted,
+                c.CreatedDate
+            }).ToList();
+            return Ok(optimizedCampaigns);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Campaign>> Create([FromBody] Campaign campaign)
+        {
+            var createdCampaign = await _campaignService.AddCampaign(campaign);
+            return CreatedAtAction(nameof(GetById), new { id = createdCampaign.CampaignId }, createdCampaign);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Campaign campaign)
+        {
+            if (id != campaign.CampaignId)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return BadRequest();
             }
+            var updatedCampaign = await _campaignService.UpdateCampaign(campaign);
+            if (updatedCampaign == null)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _campaignService.DeleteCampaign(id);
+            return NoContent();
         }
     }
-}
+} 

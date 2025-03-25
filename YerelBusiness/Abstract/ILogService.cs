@@ -1,14 +1,18 @@
-﻿using LocalEconomyApi.Models;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Entity;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.Abstract
+namespace YerelEkonomiDestekleme.Business.Abstract
 {
     public interface ILogService
     {
-        IEnumerable<Log> GetAllLogs();
-        Log GetLogById(int id);
-        void AddLog(Log log);
-        void UpdateLog(Log log);
-        void DeleteLog(int id);
-        IEnumerable<Log> GetLogsByUserId(int userId);
+        Task<List<Log>> GetAllLogs();
+        Task<Log> GetLogById(int id);
+        Task<List<Log>> GetLogsByUserId(string userId);
+        Task<List<Log>> GetLogsByAction(string action);
+        Task<Log> AddLog(Log log);
+        Task<Log> UpdateLog(Log log);
+        Task DeleteLog(int id);
     }
 }

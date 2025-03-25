@@ -1,10 +1,12 @@
-﻿using LocalEconomyApi.Abstract;
-using LocalEconomyApi.DataAccess.Abstract;
-using LocalEconomyApi.Models;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Linq;
+using YerelEkonomiDestekleme.DataAcces.Entity;
+using YerelEkonomiDestekleme.DataAcces.Abstract;
+using YerelEkonomiDestekleme.Business.Abstract;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.Concrete
+namespace YerelEkonomiDestekleme.Business.Concrete
 {
     public class LogService : ILogService
     {
@@ -15,42 +17,46 @@ namespace LocalEconomyApi.Concrete
             _logRepository = logRepository;
         }
 
-        public IEnumerable<Log> GetAllLogs()
+        public async Task<List<Log>> GetAllLogs()
         {
-            return _logRepository.GetAll();
+            var logs = await _logRepository.GetAllAsync();
+            return logs.ToList();
         }
 
-        public Log GetLogById(int id)
+        public async Task<Log> GetLogById(int id)
         {
-            var log = _logRepository.Get(l => l.LogId == id);
-            if (log == null) throw new KeyNotFoundException($"Log with ID {id} not found.");
-            return log;
+            return await _logRepository.GetByIdAsync(id);
         }
 
-        public void AddLog(Log log)
+        public async Task<List<Log>> GetLogsByUserId(string userId)
         {
-            _logRepository.Add(log);
+            var logs = await _logRepository.GetLogsByUserId(userId);
+            return logs.ToList();
         }
 
-        public void UpdateLog(Log log)
+        public async Task<List<Log>> GetLogsByAction(string action)
         {
-            var existingLog = _logRepository.Get(l => l.LogId == log.LogId);
-            if (existingLog == null) throw new KeyNotFoundException($"Log with ID {log.LogId} not found.");
-
-            _logRepository.Update(log);
+            var logs = await _logRepository.GetLogsByAction(action);
+            return logs.ToList();
         }
 
-        public void DeleteLog(int id)
+        public async Task<Log> AddLog(Log log)
         {
-            var log = _logRepository.Get(l => l.LogId == id);
-            if (log == null) throw new KeyNotFoundException($"Log with ID {id} not found.");
-
-            _logRepository.Delete(log);
+            return await _logRepository.AddAsync(log);
         }
 
-        public IEnumerable<Log> GetLogsByUserId(int userId)
+        public async Task<Log> UpdateLog(Log log)
         {
-            return _logRepository.GetLogsByUserId(userId);
+            return await _logRepository.UpdateAsync(log);
+        }
+
+        public async Task DeleteLog(int id)
+        {
+            var log = await _logRepository.GetByIdAsync(id);
+            if (log != null)
+            {
+                await _logRepository.DeleteAsync(log);
+            }
         }
     }
 }

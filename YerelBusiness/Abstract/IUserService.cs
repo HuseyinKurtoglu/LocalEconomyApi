@@ -1,16 +1,18 @@
-﻿using LocalEconomyApi.Models;
-using LocalEconomyApi.Models.Concrete;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Entity;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.Abstract
+namespace YerelEkonomiDestekleme.Business.Abstract
 {
-
     public interface IUserService
     {
-        IEnumerable<User> GetAllUsers();
-        User GetUserById(int id);
-        void AddUser(User user);
-        void UpdateUser(User user);
-        void DeleteUser(int id);
+        Task<List<User>> GetAllUsers();
+        Task<User> GetUserById(string id);
+        Task<User> GetUserByEmail(string email);
+        Task<List<User>> GetUsersByRole(string role);
+        Task<User> AddUser(User user);
+        Task<User> UpdateUser(User user);
+        Task DeleteUser(string id);
     }
 }

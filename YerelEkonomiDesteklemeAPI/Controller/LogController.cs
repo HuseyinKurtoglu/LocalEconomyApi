@@ -1,9 +1,11 @@
-﻿using LocalEconomyApi.Abstract;
-using LocalEconomyApi.Models;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Abstract;
+using YerelEkonomiDestekleme.DataAcces.Models;
+using YerelEkonomiDestekleme.Business.Abstract;
 
-namespace LocalEconomyApi.Controllers
+namespace YerelEkonomiDesteklemeAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -17,102 +19,48 @@ namespace LocalEconomyApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllLogs()
+        public async Task<ActionResult<List<Log>>> GetAllLogs()
         {
-            try
-            {
-                var logs = _logService.GetAllLogs();
-                return Ok(logs);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            var logs = await _logService.GetAllLogs();
+            return Ok(logs);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetLogById(int id)
+        public async Task<ActionResult<Log>> GetLogById(int id)
         {
-            try
+            var log = await _logService.GetLogById(id);
+            if (log == null)
             {
-                var log = _logService.GetLogById(id);
-                return Ok(log);
+                return NotFound();
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return Ok(log);
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<List<Log>>> GetLogsByUser(string userId)
+        {
+            var logs = await _logService.GetLogsByUser(userId);
+            return Ok(logs);
         }
 
         [HttpPost]
-        public IActionResult AddLog([FromBody] Log log)
+        public async Task<ActionResult<Log>> CreateLog(Log log)
         {
-            try
-            {
-                _logService.AddLog(log);
-                return CreatedAtAction(nameof(GetLogById), new { id = log.LogId }, log);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpPut("{id}")]
-        public IActionResult UpdateLog(int id, [FromBody] Log log)
-        {
-            try
-            {
-                if (id != log.LogId)
-                    return BadRequest(new { message = "Log ID mismatch." });
-
-                _logService.UpdateLog(log);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            var createdLog = await _logService.AddLog(log);
+            return CreatedAtAction(nameof(GetLogById), new { id = createdLog.LogId }, createdLog);
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteLog(int id)
+        public async Task<IActionResult> DeleteLog(int id)
         {
-            try
+            var log = await _logService.GetLogById(id);
+            if (log == null)
             {
-                _logService.DeleteLog(id);
-                return NoContent();
+                return NotFound();
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
 
-        [HttpGet("User/{userId}")]
-        public IActionResult GetLogsByUserId(int userId)
-        {
-            try
-            {
-                var logs = _logService.GetLogsByUserId(userId);
-                return Ok(logs);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            await _logService.DeleteLog(id);
+            return NoContent();
         }
     }
 }

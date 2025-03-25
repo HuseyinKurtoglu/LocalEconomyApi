@@ -1,24 +1,56 @@
-﻿using LocalEconomyApi.Data;
-using LocalEconomyApi.DataAccess.Abstract;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using LocalEconomyApi.Models;
-using LocalEconomyApi.Models.Concrete;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using YerelEkonomiDestekleme.DataAcces.Abstract;
+using YerelEkonomiDestekleme.DataAcces.Concrete;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.DataAccess.Concrete
+namespace YerelEkonomiDestekleme.DataAcces.Concrete
 {
-    public class BusinessRepository : GenericRepository<Business>, IBusinessRepository
+    public class BusinessRepository : GenericRepository<BusinessEntity>, IBusinessRepository
     {
-        private readonly AppDbContext _context;
+        private new readonly AppDbContext _context;
 
         public BusinessRepository(AppDbContext context) : base(context)
         {
             _context = context;
         }
 
-        public IEnumerable<Business> GetBusinessesByCity(string city)
+        public override async Task<IEnumerable<BusinessEntity>> GetAllAsync()
         {
-            return _context.Businesses.Where(b => b.City == city).ToList();
+            return await _context.Businesses
+                .Include(b => b.Category)
+                .Include(b => b.Campaigns)
+                .Where(b => !b.IsDeleted)
+                .ToListAsync();
+        }
+
+        public async Task<List<BusinessEntity>> GetByCategoryAsync(int categoryId)
+        {
+            return await _context.Businesses
+                .Include(b => b.Category)
+                .Include(b => b.Campaigns)
+                .Where(b => b.CategoryId == categoryId && !b.IsDeleted)
+                .ToListAsync();
+        }
+
+        public async Task<List<BusinessEntity>> GetByUserAsync(string userId)
+        {
+            return await _context.Businesses
+                .Include(b => b.Category)
+                .Include(b => b.Campaigns)
+                .Where(b => !b.IsDeleted)
+                .ToListAsync();
+        }
+
+        public async Task<List<BusinessEntity>> GetByCityAsync(string city)
+        {
+            return await _context.Businesses
+                .Include(b => b.Category)
+                .Include(b => b.Campaigns)
+                .Where(b => b.City != null && b.City.ToLower() == city.ToLower() && !b.IsDeleted)
+                .ToListAsync();
         }
     }
 }

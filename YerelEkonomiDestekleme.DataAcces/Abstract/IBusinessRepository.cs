@@ -1,12 +1,13 @@
-﻿
-using LocalEconomyApi.Models;
-using LocalEconomyApi.Models.Concrete;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.DataAccess.Abstract
+namespace YerelEkonomiDestekleme.DataAcces.Abstract
 {
-    public interface IBusinessRepository : IGenericRepository<Business>
+    public interface IBusinessRepository : IGenericRepository<BusinessEntity>
     {
-        // Business'a özgü işlemler (isteğe bağlı)
-        IEnumerable<Business> GetBusinessesByCity(string city);
+        Task<List<BusinessEntity>> GetByCategoryAsync(int categoryId);
+        Task<List<BusinessEntity>> GetByUserAsync(string userId);
+        Task<List<BusinessEntity>> GetByCityAsync(string city);
     }
 }

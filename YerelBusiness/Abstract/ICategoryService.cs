@@ -1,16 +1,18 @@
-﻿using LocalEconomyApi.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.Abstract
+namespace YerelBusiness.Abstract
 {
     public interface ICategoryService
     {
-        IEnumerable<Category> GetAllCategories();
-        Category GetCategoryById(int id);
-        void AddCategory(Category category);
-        void UpdateCategory(Category category);
-        void DeleteCategory(int id);
-        IEnumerable<Category> GetActiveCategories();
-        Category FindCategoryByName(string name);
+        Task<List<Category>> GetAllCategoriesAsync();
+        Task<Category> GetCategoryByIdAsync(int id);
+        Task<Category> AddCategoryAsync(Category category);
+        Task<Category> UpdateCategoryAsync(Category category);
+        Task DeleteCategoryAsync(Category category);
+        Task<Category> GetCategoryByNameAsync(string name);
+        Task<List<Category>> GetActiveCategoriesAsync();
+        Task<Category> FindCategoryByNameAsync(string name);
     }
 }

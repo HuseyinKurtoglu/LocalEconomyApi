@@ -1,9 +1,11 @@
-﻿using LocalEconomyApi.Abstract;
-using LocalEconomyApi.Models;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Abstract;
+using YerelEkonomiDestekleme.DataAcces.Models;
+using YerelEkonomiDestekleme.Business.Abstract;
 
-namespace LocalEconomyApi.Controllers
+namespace YerelEkonomiDesteklemeAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -16,52 +18,49 @@ namespace LocalEconomyApi.Controllers
             _favoriteService = favoriteService;
         }
 
-        [HttpGet("user/{userId}")]
-        public IActionResult GetFavoritesByUserId(int userId)
+        [HttpGet]
+        public async Task<ActionResult<List<Favorite>>> GetAllFavorites()
         {
-            try
+            var favorites = await _favoriteService.GetAllFavorites();
+            return Ok(favorites);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Favorite>> GetFavoriteById(int id)
+        {
+            var favorite = await _favoriteService.GetFavoriteById(id);
+            if (favorite == null)
             {
-                var favorites = _favoriteService.GetFavoritesByUserId(userId);
-                return Ok(favorites);
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return Ok(favorite);
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<List<Favorite>>> GetFavoritesByUser(string userId)
+        {
+            var favorites = await _favoriteService.GetFavoritesByUser(userId);
+            return Ok(favorites);
         }
 
         [HttpPost]
-        public IActionResult AddFavorite([FromBody] Favorite favorite)
+        public async Task<ActionResult<Favorite>> CreateFavorite(Favorite favorite)
         {
-            try
-            {
-                if (favorite == null) return BadRequest("Favori bilgisi geçersiz.");
-
-                _favoriteService.AddFavorite(favorite);
-                return CreatedAtAction(nameof(GetFavoritesByUserId), new { userId = favorite.UserId }, favorite);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            var createdFavorite = await _favoriteService.AddFavorite(favorite);
+            return CreatedAtAction(nameof(GetFavoriteById), new { id = createdFavorite.FavoriteId }, createdFavorite);
         }
 
-        [HttpDelete("{favoriteId}")]
-        public IActionResult RemoveFavorite(int favoriteId)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFavorite(int id)
         {
-            try
+            var favorite = await _favoriteService.GetFavoriteById(id);
+            if (favorite == null)
             {
-                _favoriteService.RemoveFavorite(favoriteId);
-                return NoContent();
+                return NotFound();
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+
+            await _favoriteService.DeleteFavorite(id);
+            return NoContent();
         }
     }
 }

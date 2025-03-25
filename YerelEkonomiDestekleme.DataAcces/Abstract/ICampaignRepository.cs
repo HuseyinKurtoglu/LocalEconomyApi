@@ -1,12 +1,19 @@
-﻿using LocalEconomyApi.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Entity;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.DataAccess.Abstract
+namespace YerelEkonomiDestekleme.DataAcces.Abstract
 {
     public interface ICampaignRepository : IGenericRepository<Campaign>
     {
-        IEnumerable<Campaign> GetActiveCampaigns();
-        IEnumerable<Campaign> GetCampaignsByCategory(int categoryId);
-        IEnumerable<Campaign> GetCampaignsByBusiness(int businessId);
+        Task<List<Campaign>> GetByBusinessAsync(int businessId);
+        Task<List<Campaign>> GetActiveAsync();
+        Task<List<Campaign>> GetExpiredAsync();
+        Task<List<Campaign>> GetUpcomingAsync();
+        Task<List<Campaign>> GetCampaignsByBusinessAsync(int businessId);
+        Task<List<Campaign>> GetActiveCampaignsAsync();
+        Task<List<Campaign>> GetCampaignsByCategoryAsync(int categoryId);
+        Task<List<Campaign>> GetByCategoryAsync(int categoryId);
     }
 }

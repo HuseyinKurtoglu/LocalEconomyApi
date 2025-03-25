@@ -1,19 +1,66 @@
-﻿using LocalEconomyApi.Data;
-using LocalEconomyApi.DataAccess.Abstract;
-using LocalEconomyApi.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using YerelEkonomiDestekleme.DataAcces.Abstract;
+using YerelEkonomiDestekleme.DataAcces.Concrete;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.DataAccess.Concrete.EntityFramework
+namespace YerelEkonomiDestekleme.DataAcces.Concrete
 {
     public class LogRepository : GenericRepository<Log>, ILogRepository
     {
-        public LogRepository(AppDbContext context) : base(context) { }
+        private new readonly AppDbContext _context;
 
-        public IEnumerable<Log> GetLogsByUserId(int userId)
+        public LogRepository(AppDbContext context) : base(context)
         {
-            return _context.Set<Log>().Where(l => l.UserId == userId && !l.IsDeleted).ToList();
+            _context = context;
+        }
+
+        public async Task<List<Log>> GetByUserAsync(string userId)
+        {
+            return await _context.Set<Log>()
+                .Include(l => l.User)
+                .Where(l => l.UserId == userId && !l.IsDeleted)
+                .OrderByDescending(l => l.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<Log>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _context.Set<Log>()
+                .Include(l => l.User)
+                .Where(l => l.CreatedAt >= startDate && l.CreatedAt <= endDate && !l.IsDeleted)
+                .OrderByDescending(l => l.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<Log>> GetByActionTypeAsync(string actionType)
+        {
+            return await _context.Set<Log>()
+                .Include(l => l.User)
+                .Where(l => l.ActionType == actionType && !l.IsDeleted)
+                .OrderByDescending(l => l.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<Log>> GetByEntityTypeAsync(string entityType)
+        {
+            return await _context.Set<Log>()
+                .Include(l => l.User)
+                .Where(l => l.EntityType == entityType && !l.IsDeleted)
+                .OrderByDescending(l => l.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<Log>> GetByEntityIdAsync(int entityId)
+        {
+            return await _context.Set<Log>()
+                .Include(l => l.User)
+                .Where(l => l.EntityId == entityId && !l.IsDeleted)
+                .OrderByDescending(l => l.CreatedAt)
+                .ToListAsync();
         }
     }
 }

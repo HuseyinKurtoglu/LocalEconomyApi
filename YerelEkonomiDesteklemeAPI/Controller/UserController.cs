@@ -1,8 +1,10 @@
-﻿using LocalEconomyApi.Abstract;
-using LocalEconomyApi.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Models;
+using YerelEkonomiDestekleme.Business.Abstract;
 
-namespace LocalEconomyApi.Controllers
+namespace YerelEkonomiDesteklemeAPI.Controller
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -16,44 +18,85 @@ namespace LocalEconomyApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllUsers()
+        public async Task<ActionResult<List<User>>> GetAll()
         {
-            var users = _userService.GetAllUsers();
+            var users = await _userService.GetAllAsync();
             return Ok(users);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetUserById(int id)
+        public async Task<ActionResult<User>> GetById(string id)
         {
-            var user = _userService.GetUserById(id);
+            var user = await _userService.GetByIdAsync(id);
             if (user == null)
+            {
                 return NotFound();
-
+            }
             return Ok(user);
         }
 
         [HttpPost]
-        public IActionResult AddUser([FromBody] User user)
+        public async Task<ActionResult<User>> Create([FromBody] User user, [FromQuery] string password)
         {
-            _userService.AddUser(user);
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+            var result = await _userService.CreateAsync(user, password);
+            if (result.Succeeded)
+            {
+                return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+            }
+            return BadRequest(result.Errors);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] User user)
+        public async Task<IActionResult> Update(string id, [FromBody] User user)
         {
             if (id != user.Id)
+            {
                 return BadRequest();
-
-            _userService.UpdateUser(user);
-            return NoContent();
+            }
+            var result = await _userService.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+            return BadRequest(result.Errors);
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteUser(int id)
+        public async Task<IActionResult> Delete(string id)
         {
-            _userService.DeleteUser(id);
-            return NoContent();
+            var user = await _userService.GetByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var result = await _userService.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+            return BadRequest(result.Errors);
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        {
+            if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
+            {
+                return BadRequest("Email ve şifre alanları boş olamaz.");
+            }
+
+            var result = await _userService.PasswordSignInAsync(model.Email!, model.Password!, false, false);
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+            return Unauthorized();
+        }
+    }
+
+    public class LoginModel
+    {
+        public string? Email { get; set; }
+        public string? Password { get; set; }
     }
 }

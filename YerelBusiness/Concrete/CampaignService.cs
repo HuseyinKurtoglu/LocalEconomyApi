@@ -1,9 +1,12 @@
-﻿using LocalEconomyApi.Abstract;
-using LocalEconomyApi.DataAccess.Abstract;
-using LocalEconomyApi.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using YerelEkonomiDestekleme.DataAcces.Entity;
+using YerelEkonomiDestekleme.DataAcces.Abstract;
+using YerelBusiness.Abstract;
+using YerelEkonomiDestekleme.DataAcces.Models;
 
-namespace LocalEconomyApi.Concrete
+namespace YerelBusiness.Concrete
 {
     public class CampaignService : ICampaignService
     {
@@ -14,49 +17,45 @@ namespace LocalEconomyApi.Concrete
             _campaignRepository = campaignRepository;
         }
 
-        public IEnumerable<Campaign> GetAllCampaigns()
+        public async Task<List<Campaign>> GetAllCampaignsAsync()
         {
-            return _campaignRepository.GetAll();
+            var campaigns = await _campaignRepository.GetAllAsync();
+            return campaigns.ToList();
         }
 
-        public Campaign GetCampaignById(int id)
+        public async Task<Campaign> GetCampaignByIdAsync(int id)
         {
-            return _campaignRepository.Get(c => c.CampaignId == id);
+            return await _campaignRepository.GetByIdAsync(id);
         }
 
-        public void AddCampaign(Campaign campaign)
+        public async Task<Campaign> AddCampaignAsync(Campaign campaign)
         {
-            _campaignRepository.Add(campaign);
+            return await _campaignRepository.AddAsync(campaign);
         }
 
-        public void UpdateCampaign(Campaign campaign)
+        public async Task<Campaign> UpdateCampaignAsync(Campaign campaign)
         {
-            _campaignRepository.Update(campaign);
+            return await _campaignRepository.UpdateAsync(campaign);
         }
 
-        public void DeleteCampaign(int id)
+        public async Task DeleteCampaignAsync(Campaign campaign)
         {
-            var campaign = _campaignRepository.Get(c => c.CampaignId == id);
-            if (campaign != null)
-            {
-                campaign.IsDeleted = true;
-                _campaignRepository.Update(campaign);
-            }
+            await _campaignRepository.DeleteAsync(campaign);
         }
 
-        public IEnumerable<Campaign> GetActiveCampaigns()
+        public async Task<List<Campaign>> GetCampaignsByBusinessAsync(int businessId)
         {
-            return _campaignRepository.GetActiveCampaigns();
+            return await _campaignRepository.GetCampaignsByBusinessAsync(businessId);
         }
 
-        public IEnumerable<Campaign> GetCampaignsByCategory(int categoryId)
+        public async Task<List<Campaign>> GetActiveCampaignsAsync()
         {
-            return _campaignRepository.GetCampaignsByCategory(categoryId);
+            return await _campaignRepository.GetActiveCampaignsAsync();
         }
 
-        public IEnumerable<Campaign> GetCampaignsByBusiness(int businessId)
+        public async Task<List<Campaign>> GetCampaignsByCategoryAsync(int categoryId)
         {
-            return _campaignRepository.GetCampaignsByBusiness(businessId);
+            return await _campaignRepository.GetCampaignsByCategoryAsync(categoryId);
         }
     }
 }

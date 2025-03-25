@@ -1,13 +1,14 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace LocalEconomyApi.DataAccess.Abstract
+namespace YerelEkonomiDestekleme.DataAcces.Abstract
 {
     public interface IGenericRepository<T> where T : class
     {
-        IEnumerable<T> GetAll();
-        T Get(Expression<Func<T, bool>> filter);
-        void Add(T entity);
-        void Update(T entity);
-        void Delete(T entity);
+        Task<IEnumerable<T>> GetAllAsync();
+        Task<T> GetByIdAsync(int id);
+        Task<T> AddAsync(T entity);
+        Task<T> UpdateAsync(T entity);
+        Task DeleteAsync(T entity);
     }
 }

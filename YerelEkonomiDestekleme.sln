@@ -5,15 +5,12 @@ VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalEconomyAPI", "YerelEkonomiDesteklemeAPI\LocalEconomyAPI.csproj", "{33396C44-5F8F-4D53-8798-326E4208D24C}"
 	ProjectSection(ProjectDependencies) = postProject
-		{B1405601-4A25-498D-BE91-435927F630DB} = {B1405601-4A25-498D-BE91-435927F630DB}
 		{D85B5614-C058-438B-960C-BE9B98E12EE6} = {D85B5614-C058-438B-960C-BE9B98E12EE6}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalEconomyApi.Business", "YerelBusiness\LocalEconomyApi.Business.csproj", "{435307C0-57D1-45EB-A1BB-25BA6F4315C4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalEconomyApi.DataAcces", "YerelEkonomiDestekleme.DataAcces\LocalEconomyApi.DataAcces.csproj", "{D85B5614-C058-438B-960C-BE9B98E12EE6}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalEconomyApi.Entities", "YerelEkonomiDestekleme.Entities\LocalEconomyApi.Entities.csproj", "{B1405601-4A25-498D-BE91-435927F630DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +30,6 @@ Global
 		{D85B5614-C058-438B-960C-BE9B98E12EE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D85B5614-C058-438B-960C-BE9B98E12EE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D85B5614-C058-438B-960C-BE9B98E12EE6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B1405601-4A25-498D-BE91-435927F630DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B1405601-4A25-498D-BE91-435927F630DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B1405601-4A25-498D-BE91-435927F630DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B1405601-4A25-498D-BE91-435927F630DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
